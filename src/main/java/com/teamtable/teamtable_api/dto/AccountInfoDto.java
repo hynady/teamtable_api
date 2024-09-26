@@ -8,19 +8,19 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountDto {
+public class AccountInfoDto {
 
     private String firstName;
-
     private String lastName;
-
     private String email;
+    private String picture;
 
-    public static AccountDto convertToDto(Account account) {
-        return AccountDto.builder()
+    public static AccountInfoDto convertAccountToAccountInfoDto(Account account) {
+        return AccountInfoDto.builder()
                 .firstName(account.getFirstName())
                 .lastName(account.getLastName())
                 .email(account.getEmail())
+                .picture(account.getPictureUrl())
                 .build();
     }
 }

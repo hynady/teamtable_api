@@ -1,13 +1,19 @@
 package com.teamtable.teamtable_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "account")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Account {
 
     @Id
@@ -34,6 +40,9 @@ public class Account {
 
     @Column(columnDefinition = "TEXT")
     private String refreshToken;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MemberCard> memberCards = new HashSet<>();
 
     public Account( String firstName, String lastName, String email, String pictureUrl, String idToken, String accessToken, String refreshToken) {
         this.firstName = firstName;

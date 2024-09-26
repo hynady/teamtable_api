@@ -14,13 +14,10 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @PostMapping("/login")
     public ResponseEntity<Void> loginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
-        // Kiểm tra tên tham số và cách sử dụng chúng trong phương thức
-        System.out.println("IdToken: "+requestBody.getId_token());
-
         String authToken = accountService.loginOAuthGoogle(requestBody.getId_token(), requestBody.getAccess_token(), requestBody.getRefresh_token());
 
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)

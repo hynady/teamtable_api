@@ -7,8 +7,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.teamtable.teamtable_api.config.JWTUtils;
 import com.teamtable.teamtable_api.model.Account;
+import com.teamtable.teamtable_api.model.Group;
+import com.teamtable.teamtable_api.model.MemberCard;
 import com.teamtable.teamtable_api.repository.AccountRepository;
+import com.teamtable.teamtable_api.repository.GroupRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -16,17 +20,24 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Set;
 
 @Service
 public class AccountService {
 
-    private final AccountRepository accountRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
+
     private final JWTUtils jwtUtils;
     private final GoogleIdTokenVerifier verifier;
 
-    public AccountService(@Value("${app.googleClientId}") String clientId, AccountRepository accountRepository,
+    public AccountService(@Value("${app.googleClientId}") String clientId, AccountRepository accountRepository, GroupRepository groupRepository,
                           JWTUtils jwtUtils) {
         this.accountRepository = accountRepository;
+        this.groupRepository = groupRepository;
         this.jwtUtils = jwtUtils;
         // Thêm dependency
         NetHttpTransport transport = new NetHttpTransport();
@@ -36,6 +47,7 @@ public class AccountService {
                 .build();
     }
 
+    @Transactional
     public Account getAccount(Long id) {
         return accountRepository.findById(id).orElse(null);
     }
@@ -107,4 +119,34 @@ public class AccountService {
             return null;
         }
     }
+
+    @Transactional
+    public Set<Group> getListGroups(Long id) {
+        Account account = accountRepository.findById(id).orElse(null);
+        if (account != null) {
+            return groupRepository.findByMemberCards_Account(account);
+        }
+        return null;
+    }
+
+//    public void sendOtp(String email) throws MessagingException {
+//        generatedOtp = String.valueOf(new Random().nextInt(999999));
+//        // Gửi OTP qua email (cần implement phương thức gửi email)
+//        // sendEmail(email, generatedOtp);
+//    }
+//
+//    public boolean verifyOtp(String otp) {
+//        return generatedOtp != null && generatedOtp.equals(otp);
+//    }
+
+    public Account updateUserInfo(Long userId, String firstName, String lastName) {
+        Account account = accountRepository.findById(userId).orElse(null);
+        if (account != null) {
+            account.setFirstName(firstName);
+            account.setLastName(lastName);
+            return accountRepository.save(account);
+        }
+        return null;
+    }
+
 }
